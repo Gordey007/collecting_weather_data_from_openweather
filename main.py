@@ -14,7 +14,7 @@ import time
 import secret
 
 
-# Функция отправки GET запроса на API openweathermap
+# Функция отправки GET запроса в API openweathermap
 def requests_2_api(id_city, appid):
     # Запрос к API
     response = requests.get(
