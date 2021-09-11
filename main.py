@@ -22,11 +22,11 @@ def requests_2_api(id_city, appid):
     # Вернуть ответа в JSON объекте
     return json.loads(response, object_hook=lambda d: SimpleNamespace(**d))
 
+
 # Функция записи в БД
-def write_2_bd(temperature, minimum_temperature, maximum_temperature,
-            perceived_temperature, humidity, atmosphere_pressure, atmospheric_pressure_sea_level,
-            atmospheric_pressure_ground_level, wind_speed, direction_wind, gust_wind, cloudiness, sunrise_time,
-            sunset_time, timestamp):
+def write_2_bd(temperature, minimum_temperature, maximum_temperature, perceived_temperature, humidity,
+               atmosphere_pressure, atmospheric_pressure_sea_level, atmospheric_pressure_ground_level, wind_speed,
+               direction_wind, gust_wind, cloudiness, sunrise_time, sunset_time, timestamp):
     # Подключение к БД
     connection = pymysql.connect(host=secret.host,
                                  user=secret.user_bd,
@@ -139,4 +139,4 @@ while True:
 
     # Системная пауза на 10 мин.
     # print("Пазуа")
-    time.sleep(600)
+    time.sleep(3)
