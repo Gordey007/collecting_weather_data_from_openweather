@@ -1,4 +1,4 @@
-#collecting_weather_data
+# collecting_weather_data
 
 Программа предназначена для сбора информации о погоде.
 
