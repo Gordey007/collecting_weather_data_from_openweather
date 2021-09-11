@@ -1,14 +1,23 @@
+# Подключение к БД MySQL
 import pymysql as pymysql
+# HTTP запрос
 import requests
 import json
+# Создание объекта SimpleNamespace, который обеспечивает доступ по атрибутам
 from types import SimpleNamespace
+# Дата и время
 from datetime import datetime
+# Пауза
+import time
+# Пароли
 import secret
 
-id_city = '2021851'
-response = requests.get(f'https://api.openweathermap.org/data/2.5/weather?id={id_city}&appid={secret.appid}&units=metric').text
+# Запрос к API
+response = requests.get(f'https://api.openweathermap.org/data/2.5/weather?id={secret.id_city}&appid={secret.appid}&units=metric').text
+# Сохранение ответа в JSON объект
 json_object = json.loads(response, object_hook=lambda d: SimpleNamespace(**d))
 
+# Получение данных
 # Температура
 temperature = json_object.main.temp
 print(f"Температура: {temperature}")
@@ -60,16 +69,16 @@ cloudiness = json_object.clouds.all
 print(f"Облачность,%: {cloudiness}")
 
 # Объем дождя за последний час, мм
-# rain_volume_one_hour = json_object.rain.1h
+# rain_volume_one_hour = json_object.rain['1h']
 
 # Объем дождя за последние 3 часа, мм
-# rain_volume_three_hour = json_object.rain.3h
+# rain_volume_three_hour = json_object.rain['3h']
 
 # Объем снега за 1 час, мм
-# snow_volume_one_hour = json_object.snow.3h
+# snow_volume_one_hour = json_object.snow['3h']
 
 # Объем снега за последние 3 часа, мм
-# snow_volume_three_hour = json_object.snow.3h
+# snow_volume_three_hour = json_object.snow['3h']
 
 # Время восхода, unix, UTC
 sunrise_time = json_object.sys.sunrise
@@ -83,7 +92,7 @@ print(f"Время заката, unix, UTC: {datetime.fromtimestamp(sunset_time)
 timestamp = json_object.dt
 print(f"Время расчета данных, unix, UTC: {datetime.fromtimestamp(timestamp)}")
 
-# Подключиться к базе данных.
+# Подключение к БД
 connection = pymysql.connect(host=secret.host,
                              user=secret.user_bd,
                              password=secret.pass_bd,
@@ -91,17 +100,24 @@ connection = pymysql.connect(host=secret.host,
                              charset='utf8mb4',
                              cursorclass=pymysql.cursors.DictCursor)
 
-try:
-    with connection.cursor() as cursor:
-        sql = """INSERT INTO weather_data_kms (temperature, minimum_temperature, maximum_temperature, 
-        perceived_temperature, humidity, atmosphere_pressure, atmospheric_pressure_sea_level, 
-        atmospheric_pressure_ground_level, wind_speed, direction_wind, gust_wind, cloudiness, sunrise_time, 
-        sunset_time, timestamp) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
-        record = (temperature, minimum_temperature, maximum_temperature, perceived_temperature, humidity,
-                  atmosphere_pressure, atmospheric_pressure_sea_level, atmospheric_pressure_ground_level, wind_speed,
-                  direction_wind, gust_wind, cloudiness, sunrise_time, sunset_time, timestamp)
-        cursor.execute(sql, record)
-        connection.commit()
-finally:
-    # Закрыть соединение (Close connection).
-    connection.close()
+# Бесконечный цикл
+while True:
+    # Запись данных в БД
+    try:
+        with connection.cursor() as cursor:
+            sql = """INSERT INTO weather_data_kms (temperature, minimum_temperature, maximum_temperature,
+            perceived_temperature, humidity, atmosphere_pressure, atmospheric_pressure_sea_level,
+            atmospheric_pressure_ground_level, wind_speed, direction_wind, gust_wind, cloudiness, sunrise_time,
+            sunset_time, timestamp) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
+            record = (temperature, minimum_temperature, maximum_temperature, perceived_temperature, humidity,
+                      atmosphere_pressure, atmospheric_pressure_sea_level, atmospheric_pressure_ground_level, wind_speed,
+                      direction_wind, gust_wind, cloudiness, sunrise_time, sunset_time, timestamp)
+            cursor.execute(sql, record)
+            connection.commit()
+    finally:
+        # Закрыть соединение (Close connection).
+        connection.close()
+
+    # Системная пауза на 10 мин.
+    # print("Пазуа")
+    time.sleep(600)
