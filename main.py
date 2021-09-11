@@ -139,4 +139,4 @@ while True:
 
     # Системная пауза на 10 мин.
     # print("Пазуа")
-    time.sleep(3)
+    time.sleep(600)
