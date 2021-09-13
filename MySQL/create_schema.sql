@@ -1,1 +1,1 @@
-CREATE SCHEMA weather_data;
+CREATE SCHEMA openweather;

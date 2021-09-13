@@ -24,25 +24,26 @@ def requests_2_api(id_city, appid):
 
 
 # Функция записи в БД
-def write_2_bd(temperature, minimum_temperature, maximum_temperature, perceived_temperature, humidity,
+def write_2_bd(city, longitude, latitude, temperature, minimum_temperature, maximum_temperature, perceived_temperature, humidity,
                atmosphere_pressure, atmospheric_pressure_sea_level, atmospheric_pressure_ground_level, wind_speed,
                direction_wind, gust_wind, cloudiness, sunrise_time, sunset_time, timestamp):
+
     # Подключение к БД
     connection = pymysql.connect(host=secret.host,
                                  user=secret.user_bd,
                                  password=secret.pass_bd,
-                                 db=secret.db,
-                                 charset='utf8mb4',
+                                 db=secret.schema,
+                                 charset='utf8',
                                  cursorclass=pymysql.cursors.DictCursor)
 
     # Запись данных в БД
     try:
         with connection.cursor() as cursor:
-            sql = """INSERT INTO weather_data_kms (temperature, minimum_temperature, maximum_temperature,
+            sql = """INSERT INTO weather_data (city, longitude, latitude, temperature, minimum_temperature, maximum_temperature,
             perceived_temperature, humidity, atmosphere_pressure, atmospheric_pressure_sea_level,
             atmospheric_pressure_ground_level, wind_speed, direction_wind, gust_wind, cloudiness, sunrise_time,
-            sunset_time, timestamp) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
-            record = (temperature, minimum_temperature, maximum_temperature, perceived_temperature, humidity,
+            sunset_time, timestamp) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
+            record = (city, longitude, latitude, temperature, minimum_temperature, maximum_temperature, perceived_temperature, humidity,
                       atmosphere_pressure, atmospheric_pressure_sea_level, atmospheric_pressure_ground_level,
                       wind_speed, direction_wind, gust_wind, cloudiness, sunrise_time, sunset_time, timestamp)
             cursor.execute(sql, record)
@@ -131,12 +132,16 @@ while True:
     timestamp = response_from_api.dt
     print(f"Время расчета данных, unix, UTC: {datetime.fromtimestamp(timestamp)}")
 
+    # Название города и его расположение
+    city = 'Komsomolsk-on-Amur'
+    longitude = 137.015244
+    latitude = 50.551991
+
     # Вызов функции записи в БД
-    write_2_bd(temperature, minimum_temperature, maximum_temperature,
-               perceived_temperature, humidity, atmosphere_pressure, atmospheric_pressure_sea_level,
-               atmospheric_pressure_ground_level, wind_speed, direction_wind, gust_wind, cloudiness, sunrise_time,
-               sunset_time, timestamp)
+    write_2_bd(city, longitude, latitude, temperature, minimum_temperature, maximum_temperature, perceived_temperature,
+               humidity, atmosphere_pressure, atmospheric_pressure_sea_level, atmospheric_pressure_ground_level,
+               wind_speed, direction_wind, gust_wind, cloudiness, sunrise_time, sunset_time, timestamp)
 
     # Системная пауза на 10 мин.
     # print("Пазуа")
-    time.sleep(600)
+    time.sleep(3)
